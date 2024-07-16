@@ -123,6 +123,7 @@ def decode_from_annotation(from_name, results):
         name += '-' + i
 
         image = decode_rle(rle)
+        image[image != 0] = 1
         layers[name] = np.reshape(image, [height, width, 4])[:, :, 3]
     return layers
 

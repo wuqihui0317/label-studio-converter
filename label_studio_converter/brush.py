@@ -102,6 +102,7 @@ def decode_from_annotation(from_name, results):
     """from LS annotation to {"tag_name + label_name": [numpy uint8 image (width x height)]}"""
     layers = {}
     counters = defaultdict(int)
+    final_image, layer_name, width, height = None, None, None, None
     for result in results:
         key = (
             'brushlabels'
@@ -121,10 +122,15 @@ def decode_from_annotation(from_name, results):
         i = str(counters[name])
         counters[name] += 1
         name += '-' + i
-
         image = decode_rle(rle)
         image[image != 0] = 1
-        layers[name] = np.reshape(image, [height, width, 4])[:, :, 3]
+        if layer_name is None:
+            final_image = image
+            layer_name = name
+        else:
+            final_image = np.maximum(final_image, image)
+    if layer_name is not None:
+        layers[layer_name] = np.reshape(final_image, [height, width, 4])[:, :, 3]
     return layers
 
 
